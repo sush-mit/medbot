@@ -5,12 +5,12 @@
 ```
     python      3.9.2
     spacy       3.2.1
-    torch       1.7.0a0
+    torch       1.7.1
     nltk        3.5
 ```
 - `punkt` dataset for `nltk` library:
 ```
-    $ python3
+    $ python
     >>> import nltk
     >>> nltk.download('punkt')
 ```
