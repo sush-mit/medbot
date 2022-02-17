@@ -34,12 +34,10 @@ def load_intents_model(
 ) -> tuple[list[str], list[str], torch.nn.Module]:
     """
     Loads list of all pattern words and tags in the intents.json file, and the trained model from pickle file.
-
     Parameters
     -----------
         pickle_filepath (str): Path to saved pickle data.
         model_filepath (str): Path to saved model.
-
     Returns
     --------
         tuple[
@@ -63,12 +61,10 @@ def load_database_model(
 ) -> tuple[list[str], list[str], torch.nn.Module]:
     """
     Loads list of all pattern words and tags in the intents.json file, and the trained model from pickle file.
-
     Parameters
     -----------
         pickle_filepath (str): Path to saved pickle data.
         model_filepath (str): Path to saved model.
-
     Returns
     --------
         tuple[
@@ -88,12 +84,10 @@ def load_database_model(
 def bag_of_words_from_input(inp: str, words: list[str]) -> torch.Tensor:
     """
     Creates a list of zeroes and ones based on whether words from input are in the total list of words or not.
-
     Parameters
     -----------
         inp (str): User input.
         words (list[str]): List of words.
-
     Returns
     --------
         torch.Tensor: Returns a Rank 1 tensor of zeroes and ones based on whether words from input are in the total list of words or not.
@@ -115,7 +109,6 @@ def get_symptoms(handle: str) -> User:
     Parameters
     -----------
         handle (str): The user handle for the user.
-
     Returns
     --------
         user (User): A dataclass storing all data from user.

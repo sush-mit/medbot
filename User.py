@@ -11,3 +11,10 @@ class User:
 
         self.symptoms = ''
         self.diagnosis: str
+        
+    def reset_diagnosis(self) -> None:
+        """
+        Resets the diagnosis of current user.
+        """
+        self.symptoms = ''
+        self.diagnosis = ''
