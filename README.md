@@ -27,5 +27,9 @@ $ python train.py
 ```
 - To chat:
 ```
-$ python medbot.py
+$ python medbot_cli.py
+```
+or
+```
+$ python medbot_gui.py
 ```
