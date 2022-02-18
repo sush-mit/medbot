@@ -4,6 +4,7 @@ import gc
 import sys
 import pickle
 import random
+from typing import Literal
 # from typing import
 
 
@@ -32,7 +33,7 @@ def get_welcome_message() -> None:
     return f"Please keep in mind that this is by no means a proper diagnosis, \
 treat the result you get from this bot as mere probabilities \
 and nothing more.\
-\nNow begins your conversation with Medbot!\
+\nNow begins your conversation with MedBot!\
 The conversational A.I. that will diagnose your illness, provided symptoms. Do start by greeting the bot!\
 \n--------------------------------------------------------------------------------------"
 
@@ -134,9 +135,7 @@ class ScrollLabel(qtw.QScrollArea):
         container_widget.layout().addWidget(self.label)
         self.setWidget(container_widget)
 
-    # the setText method
     def setText(self: ScrollLabel, text: str):
-        # setting text to the label
         self.label.setText(text)
         self.repaint()
         qtw.qApp.processEvents()
@@ -147,21 +146,34 @@ class ScrollLabel(qtw.QScrollArea):
     def setScrollMaximum(self: ScrollLabel) -> str:
         self.verticalScrollBar().setValue(self.verticalScrollBar().maximum())
 
+
 class MainWindow(qtw.QMainWindow):
     def __init__(self: MainWindow) -> None:
-        self.handle = "You"
-        self.user = None
-        self.gettingSymptomsFlag = False
-        self.endFlag = False
-        self.intents_data = generic.read_intents_file("json_file/intents.json")
+        self.handle: str = "You" # User name to show in chat.
+        self.user: User = None # User data.
+        self.gettingSymptomsFlag: bool = False # `True` if bot is getting symptoms from a user.
+        self.endFlag: bool = False # Signifies end of one round of getting symptoms for a user, that is, when probabilities are shown.\
+        # If it is set to `False` after being set to `True`, it means input phase for a user has ended, then the GUI resets to welcome a new user.
+        self.intents_data: dict[
+            list[
+                dict[
+                    Literal["tag"]: str,
+                    Literal["patterns"]: list[str],
+                    Literal["responses"]: list[str],
+                    Literal["context_set"]: Literal[""]
+                ]
+            ]
+        ] = generic.read_intents_file("json_file/intents.json")
         self.words, self.tags, self.intents_model = load_intents_model(
             pickle_filepath="pickle/intents.pickle", model_filepath="model/intents_model.pt"
         )
         
         super().__init__()
+
         self.widget = qtw.QWidget()
         
-        self.setMinimumSize(450, 600)
+        self.setWindowTitle("MedBot")
+        self.setMinimumSize(500, 600)
         
         self.user_input = qtw.QWidget()
         self.user_input.setFixedHeight(30)
@@ -193,14 +205,20 @@ class MainWindow(qtw.QMainWindow):
         self.show()
         
         self.chat_edit.setFocus()
-        self.reset()
+        self.reset() # To initialize the message area.
         
     
     def UserInputEvent(self: MainWindow) -> None:
-        user_message = self.chat_edit.text()
-        self.chat_edit.clear()
+        """
+        Method to handle events when the user presses return or "Send" button during input.
+        """
+        user_message = self.chat_edit.text() # Get user input.
+        if user_message == '':
+            return
+        self.chat_edit.clear() # Clear input area.
         
         self.update_user_message(user_message=user_message)
+
         if not self.user:
             self.get_user_name(user_message=user_message)
 
@@ -232,8 +250,16 @@ class MainWindow(qtw.QMainWindow):
                     self.gettingSymptomsFlag = True
         
         self.message_area.setScrollMaximum()
+
+
+    def update_user_message(self: MainWindow, user_message: str) -> None:
+        """
+        Adds the user's message to the message area.
         
-    def update_user_message(self: MainWindow, user_message) -> None:
+        Parameters
+        -----------
+            user_message (str): User input.
+        """
         old_messages = self.message_area.text()
         
         try:
@@ -242,7 +268,14 @@ class MainWindow(qtw.QMainWindow):
             self.message_area.setText(old_messages+f"\n\n{self.handle}:\n"+user_message)
             
             
-    def get_user_name(self: MainWindow, user_message) -> None:
+    def get_user_name(self: MainWindow, user_message: str) -> None:
+        """
+        Chat interface to run until user inputs their name.
+        
+        Parameters
+        -----------
+            user_message (str): User input.
+        """
         old_messages = self.message_area.text()
         
         if user_message.lower() == "quit":
@@ -260,8 +293,16 @@ class MainWindow(qtw.QMainWindow):
 
 
     def parse_user_input(self: MainWindow, user_message: str) -> list[str]:
-        old_messages = self.message_area.text()
+        """
+        Parses user input to discern intent, returns a list of MedBot messages.
         
+        Parameters
+        -----------
+            user_message (str): User input to parse.
+
+        Returns:
+            list[str]: List of MedBot messages; each element is to be printed in a different line.
+        """
         user_message = bag_of_words_from_input(user_message, words=self.words)
         results = self.intents_model.predict(user_message.view(-1, user_message.shape[0]))
         result_index = torch.argmax(results)
@@ -285,12 +326,7 @@ class MainWindow(qtw.QMainWindow):
         Parameters
         -----------
             handle (str): The user handle for the user.
-
-        Returns
-        --------
-            user (User): A dataclass storing all data from user.
         """
-
         if user_message.lower() == "yes":
             self.gettingSymptomsFlag = False
         
@@ -314,7 +350,7 @@ class MainWindow(qtw.QMainWindow):
             self.message_area.setText(old_messages+'\n'.join(message_))
             return
 
-        message_ = ["\n\nMedbot:"]
+        message_ = ["\n\nMedBot:"]
         
         confirmations = ["Is that all?", "Are you done?", "Move on to the diagnosis?"]
         
@@ -328,7 +364,8 @@ class MainWindow(qtw.QMainWindow):
     def reset(self: MainWindow) -> None:
         self.user = None
         self.message_area.setText(get_welcome_message())
-        
+
+
 if __name__ == "__main__":
     app = qtw.QApplication(sys.argv)
     mw = MainWindow()
