@@ -342,7 +342,7 @@ class MainWindow(qtw.QMainWindow):
             database_results = database_model.predict(user_message.view(-1, user_message.shape[0]))
 
             message_ = ["\n\nMedBot:\nProbabilities:"]
-            for disease, result in zip(diseases, *database_results.tolist()):
+            for disease, result in sorted(zip(diseases, *database_results.tolist()), key=lambda x: x[1], reverse=True)[:2]: # Change [_:_] to show select number of results.
                 message_.append(f"{disease}:  ---  {round(result*100, 2)} %")
             message_.append(f"Highest probability of: {diseases[torch.argmax(database_results)]}")
             
