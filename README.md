@@ -3,10 +3,10 @@
 ## Requirements
 - **Python**:
 ```
-    python      3.9.2
-    spacy       3.2.1
-    torch       1.11.0
-    nltk        3.5
+spacy      3.2.1
+torch      1.11.0
+nltk       3.5
+PyQt5      5.15.6
 ```
 - `punkt` dataset for `nltk` library:
 ```
